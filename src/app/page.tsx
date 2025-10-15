@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import { SupportDialog } from "@/components/forms/support-dialog"
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
           <Separator orientation="vertical" />
           FlowGrid
         </div>
-        <Button variant="outline">Support Developer 🇵🇭</Button>
+        <SupportDialog />
       </div>
       <Separator />
       
