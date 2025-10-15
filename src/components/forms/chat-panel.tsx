@@ -1,0 +1,142 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { Forward, Sparkles } from "lucide-react"
+import { Textarea } from "@/components/ui/textarea"
+import { useState, useRef, useEffect } from "react"
+
+interface Message {
+  id: string
+  role: "user" | "assistant"
+  content: string
+}
+
+export function ChatPanel() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "1",
+      role: "assistant",
+      content: "Hello! I'm here to help you create flowcharts. What would you like to design today?"
+    },
+    {
+      id: "2",
+      role: "user",
+      content: "I need a flowchart for a user login process"
+    },
+    {
+      id: "3",
+      role: "assistant",
+      content: "I'll help you create a login process flowchart. Here are the typical steps I'll include:\n\n1. Start\n2. User enters credentials\n3. Validate input\n4. Check credentials against database\n5. Success or failure paths\n6. End\n\nShould I proceed with this structure?"
+    }
+  ])
+  const [input, setInput] = useState("")
+  const [isTyping, setIsTyping] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
+
+  const handleSend = () => {
+    if (!input.trim()) return
+
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim()
+    }
+
+    setMessages([...messages, newMessage])
+    setInput("")
+    setIsTyping(true)
+
+    // Mock AI response after a short delay
+    setTimeout(() => {
+      const aiResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "I understand. I'll help you with that. (This is a mock response)"
+      }
+      setMessages(prev => [...prev, aiResponse])
+      setIsTyping(false)
+    }, 2000)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSend()
+    }
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      {/* Chat messages - scrollable area */}
+      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pt-4">
+        <div className="space-y-4 pb-4">
+          {messages.map((message) => (
+            <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : ""}`}>
+              {message.role === "assistant" && (
+                <div className="relative flex flex-col items-center shrink-0">             
+                  <div className="text-[10px] text-primary mb-1">FG</div>            
+                  <div className="w-0.5 flex-1 bg-border/50" />
+                </div>
+              )}
+              <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                message.role === "user" 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-muted"
+              }`}>
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              </div>
+            </div>
+          ))}
+          
+          {/* Typing indicator */}
+          {isTyping && (
+            <div className="flex gap-3">
+              <div className="relative flex flex-col items-center shrink-0">             
+                <div className="text-[10px] text-primary mb-1">FG</div>            
+                <div className="w-0.5 flex-1 bg-border/50" />
+              </div>
+              <div className="max-w-[80%] rounded-lg px-4 py-2">
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Thinking...
+              </p>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+      
+      {/* Chat input area - sticky at bottom */}
+      <div className="sticky bottom-0 bg-background border-t p-4">
+        <div className="flex gap-2 items-end">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Describe your flowchart..."
+            className="min-h-0 py-2 max-h-[200px] overflow-y-auto"
+            rows={1}
+          />
+          <Button 
+            variant="outline" 
+            className="shrink-0"
+            onClick={handleSend}
+            disabled={!input.trim()}
+          >
+            <Forward className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
