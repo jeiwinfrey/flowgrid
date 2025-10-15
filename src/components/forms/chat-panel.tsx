@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Forward } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useRef, useEffect } from "react"
-import { generateMermaidFromInput } from "@/lib/diagram-generator"
+import { toast } from "sonner"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
 interface Message {
   id: string
@@ -30,7 +32,7 @@ export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
     scrollToBottom()
   }, [messages])
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return
 
     const newMessage: Message = {
@@ -39,27 +41,63 @@ export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
       content: input.trim()
     }
 
-    setMessages([...messages, newMessage])
     const userInput = input.trim()
+    setMessages(prev => [...prev, newMessage])
     setInput("")
     setIsTyping(true)
 
-    // Mock AI response after a short delay
-    setTimeout(() => {
-      const mermaidCode = generateMermaidFromInput(userInput)
+    try {
+      // Prepare conversation history for context
+      const conversationHistory = messages.map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }))
+
+      // Call the API
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userInput,
+          conversationHistory
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to get AI response")
+      }
+
+      const data = await response.json()
+
+      // Add AI response to messages
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I've created a flowchart based on your request. You can see it in the diagram panel on the right. Feel free to ask me to modify it or create a different one!"
+        content: data.message || "I've created a flowchart for you."
       }
-      setMessages(prev => [...prev, aiResponse])
-      setIsTyping(false)
       
-      // Update the mermaid diagram
-      if (onMermaidUpdate) {
-        onMermaidUpdate(mermaidCode)
+      setMessages(prev => [...prev, aiResponse])
+      
+      // Update the mermaid diagram if code was generated
+      if (data.mermaidCode && onMermaidUpdate) {
+        onMermaidUpdate(data.mermaidCode)
       }
-    }, 2000)
+    } catch (error) {
+      console.error("Chat error:", error)
+      toast.error("Failed to get response from AI. Please try again.")
+      
+      // Add error message
+      const errorResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "I'm sorry, I encountered an error. Please try again."
+      }
+      setMessages(prev => [...prev, errorResponse])
+    } finally {
+      setIsTyping(false)
+    }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -82,15 +120,15 @@ export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
               </div>
               <h3 className="text-lg font-semibold">Welcome to FlowGrid</h3>
               <p className="text-sm text-muted-foreground">
-                Start creating beautiful flowcharts with AI assistance. 
-                Describe what you need and I'll generate it for you.
+                Create any type of diagram with AI assistance. 
+                Flowcharts, sequence diagrams, ER diagrams, and more!
               </p>
               <div className="pt-2 space-y-2">
                 <p className="text-xs text-muted-foreground font-medium">Try asking:</p>
                 <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
                   <div className="bg-muted/50 rounded px-3 py-1.5">"Create a login flowchart"</div>
-                  <div className="bg-muted/50 rounded px-3 py-1.5">"Show me a payment process"</div>
-                  <div className="bg-muted/50 rounded px-3 py-1.5">"Design a user registration flow"</div>
+                  <div className="bg-muted/50 rounded px-3 py-1.5">"Show me a sequence diagram for API calls"</div>
+                  <div className="bg-muted/50 rounded px-3 py-1.5">"Design an ER diagram for a blog"</div>
                 </div>
               </div>
             </div>
@@ -110,7 +148,15 @@ export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
                     ? "bg-primary text-primary-foreground" 
                     : "bg-muted"
                 }`}>
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.role === "user" ? (
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  ) : (
+                    <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
