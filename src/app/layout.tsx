@@ -19,12 +19,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
       <script src="https://tweakcn.com/live-preview.min.js"></script>
       </head>
       <body
-        className={`${outfit.variable} antialiased`}
+        className={`${outfit.variable} antialiased dark`}
       >
         {children}
         <Toaster />
