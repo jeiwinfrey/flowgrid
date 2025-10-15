@@ -1,9 +1,10 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Forward, Sparkles } from "lucide-react"
+import { Forward } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useRef, useEffect } from "react"
+import { generateMermaidFromInput } from "@/lib/diagram-generator"
 
 interface Message {
   id: string
@@ -11,7 +12,11 @@ interface Message {
   content: string
 }
 
-export function ChatPanel() {
+interface ChatPanelProps {
+  onMermaidUpdate?: (code: string) => void
+}
+
+export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -51,18 +56,25 @@ export function ChatPanel() {
     }
 
     setMessages([...messages, newMessage])
+    const userInput = input.trim()
     setInput("")
     setIsTyping(true)
 
     // Mock AI response after a short delay
     setTimeout(() => {
+      const mermaidCode = generateMermaidFromInput(userInput)
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: "I understand. I'll help you with that. (This is a mock response)"
+        content: "I've created a flowchart based on your request. You can see it in the diagram panel on the right. Feel free to ask me to modify it or create a different one!"
       }
       setMessages(prev => [...prev, aiResponse])
       setIsTyping(false)
+      
+      // Update the mermaid diagram
+      if (onMermaidUpdate) {
+        onMermaidUpdate(mermaidCode)
+      }
     }, 2000)
   }
 
