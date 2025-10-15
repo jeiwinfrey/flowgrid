@@ -12,11 +12,11 @@ interface DiagramPanelProps {
 }
 
 export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
-  const [zoom, setZoom] = useState(100)
+  const [zoom, setZoom] = useState(150) // Changed default from 100 to 150
   const [isDarkMode, setIsDarkMode] = useState(true)
 
   const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 10, 200))
+    setZoom(prev => prev + 10) // Removed max limit
   }
 
   const handleZoomOut = () => {
@@ -24,7 +24,11 @@ export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
   }
 
   const handleCenter = () => {
-    setZoom(100)
+    setZoom(150) // Reset to default 150
+    // Reset diagram position
+    if ((window as any).__resetDiagramPosition) {
+      (window as any).__resetDiagramPosition()
+    }
   }
 
   const handleCopy = async () => {
@@ -59,12 +63,13 @@ export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
     <div className="flex h-full flex-col">
       {/* Diagram content area */}
       <div className={`flex-1 overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
-        <div className={`h-full ${isDarkMode ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
+        <div className={`h-full ${isDarkMode ? 'bg-[]' : 'bg-white'}`}>
           {mermaidCode ? (
             <MermaidDiagram 
               chart={mermaidCode}
               isDarkMode={isDarkMode}
               zoom={zoom}
+              onResetPosition={handleCenter}
             />
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -72,9 +77,9 @@ export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
                 <div className="flex justify-center mb-2">
                   <img src="supabase-logo-icon.svg" alt="FlowGrid" width={64} height={64} className="opacity-30" />
                 </div>
-                <h3 className="text-xl font-semibold">Your flowchart will appear here</h3>
+                <h3 className="text-xl font-semibold">Your diagram will appear here</h3>
                 <p className="text-sm text-muted-foreground">
-                  Start chatting with FlowGrid to create your first diagram
+                  Start chatting with FlowGrid to create any type of diagram
                 </p>
               </div>
             </div>
@@ -100,7 +105,6 @@ export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
               variant="outline" 
               size="icon"
               onClick={handleZoomIn}
-              disabled={zoom >= 200}
             >
               <Plus className="h-4 w-4" />
             </Button>
