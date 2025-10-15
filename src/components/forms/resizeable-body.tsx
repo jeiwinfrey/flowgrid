@@ -12,10 +12,10 @@ import {
         direction="horizontal"
         className="h-full w-full"
       >
-        <ResizablePanel defaultSize={30} minSize={30} maxSize={30}>
+        <ResizablePanel defaultSize={30} minSize={30} maxSize={50}>
           <ChatPanel />
         </ResizablePanel>
-        <ResizableHandle />
+        <ResizableHandle withHandle />
         <ResizablePanel>
           <DiagramPanel />
         </ResizablePanel>
