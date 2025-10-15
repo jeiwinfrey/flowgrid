@@ -2,7 +2,11 @@
 
 **FlowGrid** is an AI-powered diagram generation tool that allows you to create professional Mermaid diagrams through natural conversation. Built with Next.js, it supports all types of diagrams including flowcharts, sequence diagrams, ER diagrams, and more!
 
-![FlowGrid Banner](public/supabase-logo-icon.svg)
+![FlowGrid App](landingapp.png)
+
+## 🎬 Demo
+
+![FlowGrid in Action](app.gif)
 
 ## ✨ Features
 
