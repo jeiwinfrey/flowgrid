@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import mermaid from "mermaid"
+import { renderMermaidDiagram } from "@/lib/mermaid-utils"
 
 interface MermaidDiagramProps {
   chart: string
@@ -15,35 +15,21 @@ export function MermaidDiagram({ chart, isDarkMode = true, zoom = 100 }: Mermaid
   const [error, setError] = useState<string>("")
 
   useEffect(() => {
-    // Initialize mermaid with theme
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: isDarkMode ? "dark" : "default",
-      securityLevel: "loose",
-      fontFamily: "var(--font-outfit)",
-    })
-  }, [isDarkMode])
-
-  useEffect(() => {
-    const renderDiagram = async () => {
+    const loadDiagram = async () => {
       if (!chart || !containerRef.current) return
 
-      try {
-        setError("")
-        // Generate unique ID for the diagram
-        const id = `mermaid-${Date.now()}`
-        
-        // Render the diagram
-        const { svg: renderedSvg } = await mermaid.render(id, chart)
-        setSvg(renderedSvg)
-      } catch (err) {
-        console.error("Mermaid rendering error:", err)
-        setError("Failed to render diagram. Please check your syntax.")
+      setError("")
+      const result = await renderMermaidDiagram({ chart, isDarkMode })
+      
+      if (result.error) {
+        setError(result.error)
+      } else {
+        setSvg(result.svg)
       }
     }
 
-    renderDiagram()
-  }, [chart])
+    loadDiagram()
+  }, [chart, isDarkMode])
 
   if (error) {
     return (
