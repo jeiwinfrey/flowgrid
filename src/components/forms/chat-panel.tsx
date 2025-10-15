@@ -17,23 +17,7 @@ interface ChatPanelProps {
 }
 
 export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      role: "assistant",
-      content: "Hello! I'm here to help you create flowcharts. What would you like to design today?"
-    },
-    {
-      id: "2",
-      role: "user",
-      content: "I need a flowchart for a user login process"
-    },
-    {
-      id: "3",
-      role: "assistant",
-      content: "I'll help you create a login process flowchart. Here are the typical steps I'll include:\n\n1. Start\n2. User enters credentials\n3. Validate input\n4. Check credentials against database\n5. Success or failure paths\n6. End\n\nShould I proceed with this structure?"
-    }
-  ])
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -89,42 +73,66 @@ export function ChatPanel({ onMermaidUpdate }: ChatPanelProps) {
     <div className="flex h-full flex-col">
       {/* Chat messages - scrollable area */}
       <div className="flex-1 overflow-y-auto scrollbar-hide px-4 pt-4">
-        <div className="space-y-4 pb-4">
-          {messages.map((message) => (
-            <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : ""}`}>
-              {message.role === "assistant" && (
+        {messages.length === 0 && !isTyping ? (
+          /* Empty state - call to action */
+          <div className="flex items-center justify-center h-full">
+            <div className="text-center space-y-3 max-w-md px-4">
+              <div className="flex justify-center mb-2">
+                <img src="supabase-logo-icon.svg" alt="FlowGrid" width={48} height={48} className="opacity-50" />
+              </div>
+              <h3 className="text-lg font-semibold">Welcome to FlowGrid</h3>
+              <p className="text-sm text-muted-foreground">
+                Start creating beautiful flowcharts with AI assistance. 
+                Describe what you need and I'll generate it for you.
+              </p>
+              <div className="pt-2 space-y-2">
+                <p className="text-xs text-muted-foreground font-medium">Try asking:</p>
+                <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                  <div className="bg-muted/50 rounded px-3 py-1.5">"Create a login flowchart"</div>
+                  <div className="bg-muted/50 rounded px-3 py-1.5">"Show me a payment process"</div>
+                  <div className="bg-muted/50 rounded px-3 py-1.5">"Design a user registration flow"</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4 pb-4">
+            {messages.map((message) => (
+              <div key={message.id} className={`flex gap-3 ${message.role === "user" ? "justify-end" : ""}`}>
+                {message.role === "assistant" && (
+                  <div className="relative flex flex-col items-center shrink-0">             
+                    <div className="text-[10px] text-primary mb-1">FG</div>            
+                    <div className="w-0.5 flex-1 bg-border/50" />
+                  </div>
+                )}
+                <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                  message.role === "user" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted"
+                }`}>
+                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                </div>
+              </div>
+            ))}
+            
+            {/* Typing indicator */}
+            {isTyping && (
+              <div className="flex gap-3">
                 <div className="relative flex flex-col items-center shrink-0">             
                   <div className="text-[10px] text-primary mb-1">FG</div>            
                   <div className="w-0.5 flex-1 bg-border/50" />
                 </div>
-              )}
-              <div className={`max-w-[80%] rounded-lg px-4 py-2 ${
-                message.role === "user" 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted"
-              }`}>
-                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                <div className="max-w-[80%] rounded-lg px-4 py-2">
+                <p className="text-sm text-muted-foreground animate-pulse">
+                  Thinking...
+                </p>
+                </div>
               </div>
-            </div>
-          ))}
-          
-          {/* Typing indicator */}
-          {isTyping && (
-            <div className="flex gap-3">
-              <div className="relative flex flex-col items-center shrink-0">             
-                <div className="text-[10px] text-primary mb-1">FG</div>            
-                <div className="w-0.5 flex-1 bg-border/50" />
-              </div>
-              <div className="max-w-[80%] rounded-lg px-4 py-2">
-              <p className="text-sm text-muted-foreground animate-pulse">
-                Thinking...
-              </p>
-              </div>
-            </div>
-          )}
-          
-          <div ref={messagesEndRef} />
-        </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+        )}
       </div>
       
       {/* Chat input area - sticky at bottom */}
