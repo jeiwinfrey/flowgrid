@@ -55,26 +55,30 @@ export function DiagramPanel({ mermaidCode }: DiagramPanelProps) {
     }
   }
 
-  // Default mermaid example
-  const defaultMermaid = `graph TD
-    A[Start] --> B{Is it working?}
-    B -->|Yes| C[Great!]
-    B -->|No| D[Debug]
-    D --> B
-    C --> E[End]`
-
-  const displayCode = mermaidCode || defaultMermaid
-
   return (
     <div className="flex h-full flex-col">
       {/* Diagram content area */}
       <div className={`flex-1 overflow-hidden ${isDarkMode ? 'dark' : ''}`}>
-        <div className={`h-full ${isDarkMode ? 'bg-[#242424' : 'bg-white'}`}>
-          <MermaidDiagram 
-            chart={displayCode}
-            isDarkMode={isDarkMode}
-            zoom={zoom}
-          />
+        <div className={`h-full ${isDarkMode ? 'bg-[#0a0a0a]' : 'bg-white'}`}>
+          {mermaidCode ? (
+            <MermaidDiagram 
+              chart={mermaidCode}
+              isDarkMode={isDarkMode}
+              zoom={zoom}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-3 max-w-md px-6">
+                <div className="flex justify-center mb-2">
+                  <img src="supabase-logo-icon.svg" alt="FlowGrid" width={64} height={64} className="opacity-30" />
+                </div>
+                <h3 className="text-xl font-semibold">Your flowchart will appear here</h3>
+                <p className="text-sm text-muted-foreground">
+                  Start chatting with FlowGrid to create your first diagram
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
