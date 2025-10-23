@@ -150,17 +150,6 @@ flowgrid/
 └── package.json
 ```
 
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to:
-- Report bugs
-- Suggest new features
-- Submit pull requests
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## 🙏 Acknowledgments
 
 - Built with ❤️ by [Jeiwinfrey Ulep](mailto:jeiwinfreyulep12@gmail.com)
